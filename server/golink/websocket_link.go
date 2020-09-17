@@ -9,9 +9,9 @@ package golink
 
 import (
 	"fmt"
-	"go-stress-testing/heper"
-	"go-stress-testing/model"
-	"go-stress-testing/server/client"
+	"github.com/nbuhell/go-stress-testing/heper"
+	"github.com/nbuhell/go-stress-testing/model"
+	"github.com/nbuhell/go-stress-testing/server/client"
 	"sync"
 	"time"
 )

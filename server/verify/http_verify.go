@@ -11,7 +11,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"go-stress-testing/model"
+	"github.com/nbuhell/go-stress-testing/model"
 	"io"
 	"io/ioutil"
 	"net/http"

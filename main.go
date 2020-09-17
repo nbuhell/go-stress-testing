@@ -10,8 +10,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go-stress-testing/model"
-	"go-stress-testing/server"
+	"github.com/nbuhell/go-stress-testing/model"
+	"github.com/nbuhell/go-stress-testing/server"
 	"runtime"
 	"strings"
 )
