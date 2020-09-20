@@ -14,7 +14,8 @@ import (
 
 func TestCurl(t *testing.T) {
 	// ../curl.txt
-	c, err := ParseTheFile("../curl/post.curl.txt")
+	//c, err := ParseTheFile("../curl/post.curl.txt")
+	c, err := ParseTheFile("C:\\Users\\JXH\\Desktop\\test1.txt")
 	fmt.Println(c, err)
 
 	if err != nil {

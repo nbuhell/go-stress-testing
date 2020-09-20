@@ -91,40 +91,52 @@ func ParseTheFile(path string) (curl *CURL, err error) {
 		data = strings.TrimSpace(data)
 
 		// url
-		if !strings.HasPrefix(key, "-") {
-			key = strings.Trim(key, "'")
-			curl.Data["curl"] = []string{key}
-
-			// 去除首尾空格
-			data = strings.TrimFunc(data, func(r rune) bool {
-				if r == ' ' || r == '\\' || r == '\n' {
-					return true
-				}
-
-				return false
-			})
-			continue
-		}
+		//if !strings.HasPrefix(key, "-") {
+		//	key = strings.Trim(key, "'")
+		//	curl.Data["curl"] = []string{key}
+		//
+		//	// 去除首尾空格
+		//	data = strings.TrimFunc(data, func(r rune) bool {
+		//		if r == ' ' || r == '\\' || r == '\n' {
+		//			return true
+		//		}
+		//
+		//		return false
+		//	})
+		//	continue
+		//}
 
 		if strings.HasPrefix(data, "-") {
 			continue
 		}
 
 		var (
-			endSymbol = " "
+			endSymbol = " -"
+			trm       = 0
 		)
 
 		if strings.HasPrefix(data, "'") {
-			endSymbol = "'"
+			//endSymbol = "'"
+			trm = 1
 			data = data[1:]
 		}
 
-		index = strings.Index(data, endSymbol)
-		if index <= -1 {
-			break
+		isend := strings.Index(data, endSymbol)
+
+		if isend > 0 {
+			value = data[:isend-trm]
+			data = data[isend+1:]
+		} else {
+			index = len(data)
+			value = data[:index-trm]
+			data = ""
 		}
-		value = data[:index]
-		data = data[index+1:]
+		//index = strings.Index(data, endSymbol)
+		//if index <= -1 {
+		//	break
+		//}
+		//value = data[:index]
+		//data = data[index+1:]
 
 		// 去除首尾空格
 		data = strings.TrimFunc(data, func(r rune) bool {
@@ -157,15 +169,24 @@ func (c *CURL) String() (url string) {
 // GetUrl
 func (c *CURL) GetUrl() (url string) {
 
-	keys := []string{"curl"}
+	keys := []string{"-X", "--request"}
 	value := c.getDataValue(keys)
-	if len(value) <= 0 {
-
+	if len(value) > 0 {
+		idx := strings.Index(value[0], " ")
+		trul := value[0][idx+1:]
+		if strings.Index(trul, "'") >= 0 {
+			url = trul[1 : len(trul)-2]
+		} else {
+			url = trul
+		}
 		return
 	}
-
+	keys = []string{"curl"}
+	value = c.getDataValue(keys)
+	if len(value) <= 0 {
+		return
+	}
 	url = value[0]
-
 	return
 }
 
@@ -174,7 +195,7 @@ func (c *CURL) GetMethod() (method string) {
 	method = "GET"
 
 	var (
-		postKeys = []string{"--d", "--data", "--data-binary $", "--data-binary"}
+		postKeys = []string{"--d", "--data", "--data-raw", "--data-binary"}
 	)
 	value := c.getDataValue(postKeys)
 
@@ -184,6 +205,13 @@ func (c *CURL) GetMethod() (method string) {
 
 	keys := []string{"-X", "--request"}
 	value = c.getDataValue(keys)
+
+	if len(value) > 0 {
+		idx := strings.Index(value[0], " ")
+		tmethod := value[0][:idx]
+		method = strings.ToUpper(tmethod)
+		return
+	}
 
 	if len(value) <= 0 {
 

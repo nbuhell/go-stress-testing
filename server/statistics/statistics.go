@@ -9,7 +9,7 @@ package statistics
 
 import (
 	"fmt"
-	"github.com/nbuhell/go-stress-testing/model"
+	"go-stress-testing/model"
 	"strings"
 	"sync"
 	"time"

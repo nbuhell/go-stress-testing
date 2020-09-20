@@ -11,7 +11,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/nbuhell/go-stress-testing/model"
+	"go-stress-testing/model"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -58,9 +58,10 @@ func HttpStatusCode(request *model.Request, response *http.Response) (code int, 
 
 // 返回数据结构体
 type ResponseJson struct {
-	Code int         `json:"code"`
-	Msg  string      `json:"msg"`
-	Data interface{} `json:"data"`
+	Code   int         `json:"code"`
+	Msg    string      `json:"msg"`
+	Data   interface{} `json:"data"`
+	Result string      `json:"result"`
 }
 
 // 通过返回的Body 判断
@@ -87,7 +88,7 @@ func HttpJson(request *model.Request, response *http.Response) (code int, isSucc
 				code = responseJson.Code
 
 				// body 中code返回200为返回数据成功
-				if responseJson.Code == 200 {
+				if responseJson.Code == 200 || responseJson.Result == "true" {
 					isSucceed = true
 				}
 			}

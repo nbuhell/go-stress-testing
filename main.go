@@ -10,10 +10,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/nbuhell/go-stress-testing/model"
-	"github.com/nbuhell/go-stress-testing/server"
+	"go-stress-testing/model"
+	"go-stress-testing/server"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type array []string
@@ -37,23 +38,29 @@ func main() {
 	runtime.GOMAXPROCS(1)
 
 	var (
-		concurrency uint64 // 并发数
-		totalNumber uint64 // 请求总数(单个并发)
-		debugStr    string // 是否是debug
-		requestUrl  string // 压测的url 目前支持，http/https ws/wss
-		path        string // curl文件路径 http接口压测，自定义参数设置
-		verify      string // verify 验证方法 在server/verify中 http 支持:statusCode、json webSocket支持:json
-		headers     array  // 自定义头信息传递给服务器
-		body        string // HTTP POST方式传送数据
+		concurrency   uint64 // 并发数
+		totalNumber   uint64 // 请求总数(单个并发)
+		sessionNumber int    // session数量
+		timeout       int
+		debugStr      string // 是否是debug
+		requestUrl    string // 压测的url 目前支持，http/https ws/wss
+		path          string // curl文件路径 http接口压测，自定义参数设置
+		verify        string // verify 验证方法 在server/verify中 http 支持:statusCode、json webSocket支持:json
+		headers       array  // 自定义头信息传递给服务器
+		sessionkey    string // HTTP POST方式传送数据
+		body          string // HTTP POST方式传送数据
 	)
 
 	flag.Uint64Var(&concurrency, "c", 1, "并发数")
 	flag.Uint64Var(&totalNumber, "n", 1, "请求总数")
+	flag.IntVar(&sessionNumber, "s", 1, "Session总数")
+	flag.IntVar(&timeout, "t", 60, "超时时间")
 	flag.StringVar(&debugStr, "d", "false", "调试模式")
 	flag.StringVar(&requestUrl, "u", "", "压测地址")
 	flag.StringVar(&path, "p", "", "curl文件路径")
 	flag.StringVar(&verify, "v", "", "验证方法 http 支持:statusCode、json webSocket支持:json")
 	flag.Var(&headers, "H", "自定义头信息传递给服务器 示例:-header 'Content-Type: application/json'")
+	flag.StringVar(&sessionkey, "SK", "", "sessionkey")
 	flag.StringVar(&body, "data", "", "HTTP POST方式传送数据")
 
 	// 解析参数
@@ -69,7 +76,7 @@ func main() {
 	}
 
 	debug := strings.ToLower(debugStr) == "true"
-	request, err := model.NewRequest(requestUrl, verify, 0, debug, path, headers, body)
+	request, err := model.NewRequest(requestUrl, verify, time.Duration(timeout)*time.Second, debug, path, headers, body)
 	if err != nil {
 		fmt.Printf("参数不合法 %v \n", err)
 
@@ -79,8 +86,12 @@ func main() {
 	fmt.Printf("\n 开始启动  并发数:%d 请求数:%d 请求参数: \n", concurrency, totalNumber)
 	request.Print()
 
-	// 开始处理
-	server.Dispose(concurrency, totalNumber, request)
+	if sessionkey == "" {
+		// 开始处理
+		server.Dispose(concurrency, totalNumber, request)
+	} else {
+		server.DisposeSession(concurrency, totalNumber, sessionNumber, sessionkey, request)
+	}
 
 	return
 }
